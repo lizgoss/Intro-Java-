@@ -1,0 +1,145 @@
+import java.util.*;
+
+public class Budgeter{
+
+   //constant for number of days in a month
+   public static final int MONTH_DAYS = 31;
+
+   public static void main (String[] agrs){
+   
+      Scanner reader = new Scanner(System.in);
+      
+      Intro();
+      
+      double income = getIncome(reader);
+      System.out.println(); //figure out how to work into method
+      
+      int dailyCheck = 0;
+      dailyCheck = monthlyDaily(reader, dailyCheck);
+      double expenses = getExpenses(reader, dailyCheck);
+      System.out.println(); //figure out how to work into method
+      
+      getReport(income, expenses);
+      System.out.println(); //figure out how to work into method
+      
+      getDifference(income, expenses);
+
+   }
+   
+   //prints into for user knowledge of program input 
+   public static void Intro(){
+      System.out.println("This program asks for your monthly income and ");
+      System.out.println("expenses, then tells you your net monthly income.");
+      System.out.println();
+   }
+
+   //prompts for income and adds to total 
+   //
+   //Scanner reader - allows method to acess the scanner to get user input
+   public static double getIncome(Scanner reader){
+      double totalIncome = 0;
+      
+      System.out.print("How many categories of income? ");
+      double categories = reader.nextDouble();
+      
+      for (int i = 1; i <= categories; i++){
+         System.out.print("    Next income amount? $");
+         totalIncome += reader.nextDouble();
+      }
+      
+      return totalIncome;
+   }
+   
+   //asks for and creates a counter for if expense is monthly or daily
+   //
+   //Scanner reader - allows method to acess the scanner to get user input
+   //int dailyCheck - counter variable to keep track of monthly or daily expenses
+   public static int monthlyDaily(Scanner reader, int dailyCheck){
+      System.out.print("Enter 1) monthly or 2) daily expenses? "); 
+      dailyCheck = reader.nextInt();
+      return dailyCheck;
+   }
+   
+   //prompts for expense and adds to total, factoring monthly or daily total
+   //
+   //Scanner reader - allows method to acess the scanner to get user input
+   //int dailyCheck - counter variable to keep track of monthly or daily expenses
+   public static double getExpenses(Scanner reader, int dailyCheck){
+      double totalExpenses = 0;
+      System.out.print("How many categories of expense? ");
+      double categories = reader.nextDouble();
+      
+      for (int i = 1; i <= categories; i++){
+         System.out.print("    Next expense amount? $");
+         totalExpenses += reader.nextDouble();
+      }
+      
+      if (dailyCheck == 2)
+      {
+         totalExpenses *= MONTH_DAYS;
+      }
+      return totalExpenses;     
+   }
+   
+   //rounds the value to two decimal places 
+   //
+   //double num - double number to round to two decimals
+   public static double round2(double num)
+   {
+      return Math.round(num * 100.0) / 100.0;
+   }
+
+   //prints the total income and amount per day 
+   //
+   //double totalIncome - total income of values passed in by user
+   //double totalExpenses - total expenses of values passed in by user
+   public static void getReport(double totalIncome, double totalExpenses){
+         System.out.print("Total income = $" + round2(totalIncome));
+         System.out.println(" ($" + round2((totalIncome/MONTH_DAYS)) + "/day)");
+         System.out.print("Total expenses = $" + round2(totalExpenses));
+         System.out.println(" ($" + round2((totalExpenses/MONTH_DAYS)) + "/day)");
+   }
+   
+   //prints difference, type of spender or saver, and custom message
+   //
+   //double totalIncome - total income of values passed in by user
+   //double totalExpenses - total expenses of values passed in by user
+   public static void getDifference(double totalIncome, double totalExpenses){
+      double difference = totalIncome - totalExpenses;
+      
+      if (difference > 0){
+         System.out.println("You earned $" + round2(difference) + " more than you spent this month.");
+         System.out.print("You're a ");
+         if (difference > 250){
+            System.out.println("big saver.");
+            System.out.println("Treat your self!");
+         }
+         else{
+            System.out.println("saver.");
+            System.out.println("Get an ice cream cone!");
+         }
+      }
+      
+      else if (difference == 0)
+      {
+         System.out.println("You earned $" + round2(difference) + " more than you spent this month.");
+         System.out.print("You're a spender");
+         System.out.println("There is always next month!");
+      }
+      
+      else{
+         System.out.println("You spent $" + Math.abs(difference) + " more than you earned this month.");
+         System.out.print("You're a spender");
+         
+         if(Math.abs(difference) < 250){
+            System.out.println("spender.");
+            System.out.println("There is always next month!");
+         }
+         else{
+            System.out.println("big spender");
+            System.out.println("Have you ever tried a piggy bank?");
+         }
+      }
+   }
+
+}
