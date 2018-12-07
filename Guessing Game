@@ -1,0 +1,104 @@
+import java.util.*;
+
+public class GuessingGame{
+
+   //class constant to alter the guess range of numbers
+   public static final int MAX_NUMBER = 100;
+
+   public static void main(String[] args){
+   
+    Scanner reader = new Scanner(System.in);
+    Random rand = new Random();
+    int numGames = 0;
+    int guessGet = 0;
+    int guessTotal = 0; 
+    int bestGuesses = 0;
+    boolean continueMark = true; 
+   
+    intro();
+    
+    guessGet = game(reader, rand);
+    bestGuesses = guessGet;
+    guessTotal += guessGet;
+    
+    while(continueMark != false){
+      System.out.print("Do you want to play again? ");
+      String again = reader.next();
+      numGames++;
+      
+      String firstLetter = again.substring(0,1);
+      
+      if (firstLetter.equalsIgnoreCase("y")){
+         guessGet = game(reader, rand);
+         guessTotal += guessGet;
+         if (guessGet < bestGuesses){
+            bestGuesses = guessGet;
+         }
+      }
+      else{
+         continueMark = false;
+      }
+    }
+       
+    stats(numGames, guessTotal, bestGuesses);
+  }
+   
+   //prints my custom haiku at the beggining of the game
+   public static void intro(){
+      System.out.println("Time to play the game.");
+      System.out.println("How many times will it take?");
+      System.out.println("Continue to see.");
+   }
+   
+   //runs through one round of the game and returns the guesses in the round
+   //
+   //Scanner reader - allows for user input to submit guesses
+   //Random rand    - allows for a random number to be generated to guess 
+   public static int game(Scanner reader, Random rand){
+      int number = rand.nextInt(MAX_NUMBER) + 1;
+      int roundGuesses = 1; 
+      
+      System.out.println("I'm thinking of a number between 1 and " + MAX_NUMBER +"...");
+      
+      System.out.print("You're guess? ");
+      int guess = reader.nextInt();
+      
+      while (guess != number){
+           if (guess > number){
+            System.out.println("It's lower.");
+           }
+           else if (guess < number){
+            System.out.println("It's higher.");
+           }
+           
+           System.out.print("You're guess? ");
+           guess = reader.nextInt();
+           roundGuesses++;
+           }
+          
+      System.out.println("You got it right in " + roundGuesses + " guesses!"); 
+      
+      return roundGuesses; 
+   }
+      
+   //rounds a double to two decimal places
+   //
+   //double num - the number being rounded to two decimal places
+   public static double round2(double num)
+   {
+      return Math.round(num * 100.0) / 100.0;
+   }
+   
+   //prints overall game stats to the consule
+   //
+   //int numGames    - variable holding the number of games played
+   //int guessTotal  - variable holding the toal guess amount
+   //int bestGuesses - variable holding the minimum guess attempt value 
+   public static void stats(int numGames, int guessTotal, int bestGuesses){
+      System.out.println("Overall results : ");
+      System.out.println("Total games   = " + numGames);
+      System.out.println("Total guesses = " + guessTotal);
+      System.out.println("Guesses/game  = " + round2((double)guessTotal/numGames));
+      System.out.println("Best game     = " + bestGuesses);
+   }
+}
