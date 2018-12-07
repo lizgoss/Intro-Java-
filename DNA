@@ -1,0 +1,198 @@
+//allows for user input
+import java.util.*;
+//allows for file input and output
+import java.io.*;
+
+public class DNA{
+
+   //minimum number of codons a valid protein must have
+   static final int minCodons = 5;
+   //percentage of mass from C and G in order for a protein to be valid   
+   static final double percentMass = 30.0;
+   //number of unique nucleotides   
+   static final int uniqueNucleotides = 4;  
+   //number of nucleotides per codon
+   static final int nucleotidesPerCodon = 3; 
+   
+   public static void main(String[] args)throws FileNotFoundException{
+   
+      Scanner reader = new Scanner(System.in);
+      intro(); 
+      
+      File inFile = getInputFile(reader);
+      File outFile = getOutputFile(reader);
+      
+      Scanner inputReader = new Scanner(inFile);
+      PrintStream output = new PrintStream(outFile);
+      
+      while(inputReader.hasNextLine()){
+         String name = inputReader.nextLine();
+         String nucleotide = (inputReader.nextLine()).toUpperCase();
+         
+         double junkTotal = getJunkMass(nucleotide);
+         int[] nucleotideCount = countNucleotides(nucleotide);
+         double[] massPercent = new double[4];
+         double massTotal = totalMass(junkTotal, nucleotideCount, nucleotide, massPercent);
+         String[] codons = codonList(nucleotide);
+         String isProtein = isProtein(codons, massPercent);
+         
+         printData(output, name, nucleotide, nucleotideCount, 
+                   massPercent, massTotal, codons, isProtein);
+      }
+      
+   }
+   
+   //prints the program intro 
+   public static void intro(){
+      System.out.println("This program reports information about DNA");
+      System.out.println("nucleotide sequences that may encode proteins.");
+   }
+
+   //passes in user input as a file to read and returns the file
+   //
+   //Scanner s - allows for user input
+   public static File getInputFile(Scanner s) {
+      System.out.print("Input file name? ");
+      String fileNameIn = s.nextLine();
+      File inFile = new File(fileNameIn);
+
+      return inFile;
+   }
+
+   //passes in user input as a file to write to and returns the file 
+   //
+   //Scanner s - allows for user input
+   public static File getOutputFile(Scanner s){
+      System.out.print("Output file name? ");
+      String fileNameOut = s.nextLine();
+      File outFile = new File(fileNameOut);
+
+      return outFile;
+   }
+   
+   //counts the junk and returns the mass of junk as a double
+   //
+   //String nucleotides - string of nucleotides
+   public static double getJunkMass(String nucleotides){
+      double junkTotal = 0;
+       for(int i = 0; i < nucleotides.length(); i++)
+       {
+           if(nucleotides.charAt(i) == '-')
+               junkTotal += 100.00;
+       }
+       return junkTotal;
+   }
+   
+   //counts the number of each unique nucleotide and returns an array of counts
+   //
+   //String nucleotides - string of nucleotides
+   public static int[] countNucleotides(String nucleotides){
+      char[] nucleotideTemplate = {'A', 'C', 'G', 'T'};
+      int[] counts = new int[uniqueNucleotides];
+      
+      for(int i = 0; i < nucleotides.length(); i++) {
+         for(int j = 0; j < nucleotideTemplate.length; j++){
+            if(nucleotides.charAt(i) == nucleotideTemplate[j]){
+               counts[j]++;
+            }
+         }
+      }
+      return counts;
+   }
+   
+   //counts the total mass and mass per unique nucleotide returning total mass
+   //
+   //double junkTotal - total mass of junk
+   //int[] nucleotideCount - array of counts of each unique nucleotide
+   //String nucleotides - sting of all nucleotides
+   //double[] massPercents - array of masses per unique nucleotide 
+   public static double totalMass(double junkTotal, int[] nucleotideCount, 
+                                  String nucleotides, double[] massPercents){
+      int[] counts = countNucleotides(nucleotides);
+      double[] masses = {135.128, 111.103, 151.128, 125.107};
+      double total = junkTotal;
+           
+      for(int i = 0; i < masses.length; i++){
+         masses[i] *= counts[i];
+         total += masses[i];
+      }
+      
+      for(int i = 0; i < massPercents.length; i++){
+         massPercents[i] = (double) Math.round((masses[i]/total * 100) *10) / 10;
+      } 
+      
+      return Math.round(total * 10.0)/10.0;      
+   }
+   
+   //returns an array of the codons in the nucleotide string
+   //
+   //String nucleotides - string of nucleotides
+   public static String[] codonList(String nucleotides){    
+       String withoutJunk = "";
+       String codonSets = "";
+       int index = 0;
+      
+       for(int i = 0; i < nucleotides.length(); i++)
+       {
+           if(nucleotides.charAt(i) != '-')
+               withoutJunk += nucleotides.charAt(i);
+       }
+      
+       String[] codons = new String[withoutJunk.length() / nucleotidesPerCodon];      
+      
+       for(int i = 0; i < withoutJunk.length(); i++)
+       {
+           codonSets += withoutJunk.charAt(i);
+           if(codonSets.length() == nucleotidesPerCodon)
+           {
+               codons[index] = codonSets;
+               codonSets = "";
+               index++;
+           }
+       }
+       return codons;
+   }  
+   
+   //returns a string of yes or no if the nucleotide is or is not a protein
+   //
+   //String[] codons - array of codons in nucleotide string
+   //double[] massPercent - array of masses per unique nucleotide 
+   public static String isProtein(String[] codons, double[] massPercent){
+       if((codons[0].equals("ATG")))
+       {
+           if(codons.length >= minCodons
+                   && (massPercent[1] + massPercent[2]) >= percentMass)
+           {
+               if(codons[codons.length - 1].equals("TAA")|| codons[codons.length - 1].equals("TAG")
+                  || codons[codons.length - 1].equals("TGA"))
+               {
+                   return "YES";
+               }
+           }
+       }
+       return "NO";
+   }
+   
+   //prints data to the output file via a print stream
+   //
+   //PrintStream output - prints to output file 
+   //String name - name of nucleotide
+   //String nucleotide - string of nucleotides
+   //int[] nucleotideCount - array of counts of each unique nucleotide
+   //double[] massPercent - array of masses of each unique nucleotide
+   //double massTotal - total mass of nucleotide
+   //String[] codons - array of each codon in nucleotide
+   //String isProtein - string indicating if is or is not a protein 
+   public static void printData(PrintStream output, String name, String nucleotide, 
+                                int[] nucleotideCount, double[] massPercent, double massTotal, 
+                                String[] codons, String isProtein){
+                                
+      output.println("Region Name: " + name);
+      output.println("Nucleotides: " + nucleotide);
+      output.println("Nuc. Counts: " + Arrays.toString(nucleotideCount));
+      output.println("Total Mass%: " + Arrays.toString(massPercent) + " of " + massTotal);
+      output.println("Codons List: " +  Arrays.toString(codons));
+      output.println("Is Protein?: " + isProtein);
+      output.println();
+   }
+}
